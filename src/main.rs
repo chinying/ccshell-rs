@@ -1,3 +1,5 @@
+mod os_utils;
+
 #[allow(unused_imports)]
 use std::io::{self, Write};
 
@@ -15,7 +17,26 @@ fn handle_command(command: &str) {
                 if VALID_COMMANDS.contains(&tokens[1]) {
                     println!("{} is a shell builtin", tokens[1]);
                 } else {
-                    println!("{}: not found", tokens[1]);
+                    let path = os_utils::get_path().unwrap();
+                    let dirs = os_utils::get_dir_from_path(&path);
+                    let mut found: Option<String> = Option::None;
+                    for dir in dirs {
+                        if dir.contains("com.apple.security.cryptexd") {
+                            continue;
+                        }
+                        if os_utils::list_dir(&dir).unwrap().contains(&tokens[1].to_string()) {
+                            found = Some(dir);
+                            break;
+                        }
+                    }
+                    match found {
+                        Some(dir) => {
+                            println!("{} is {}/{}", tokens[1], &dir, tokens[1]);
+                        }
+                        None => {
+                            println!("{}: not found", tokens[1]);
+                        }
+                    }
                 }
             }
         }
@@ -43,4 +64,5 @@ fn main() {
             }
         }
     }
+    // println!("{:?}", os_utils::list_dir("/bin").unwrap());
 }
