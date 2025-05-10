@@ -14,7 +14,17 @@ fn main() {
 
         match input.trim() {
             "exit 0" => exit = true,
-            _ => println!("{}: command not found", input.trim()),
+            command => {
+                if command.starts_with("echo") {
+                    let tokens = command.split_whitespace().collect::<Vec<&str>>();
+                    if tokens.len() > 1 {
+                        let rest = &tokens[1..];
+                        println!("{}", rest.join(" "));
+                    }
+                } else {
+                    println!("{}: command not found", input.trim());
+                }
+            }
         }
     }
 }
