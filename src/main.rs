@@ -88,7 +88,7 @@ fn exec(command: &str) {
 fn main() {
     // by default, treat everything as invalid
     let mut exit = false;
-    let mut directory = directory::Directory::new();
+    let mut directory = directory::Directory::new().unwrap(); // TODO: handle error later
     while !exit {
         // Wait for user input
         print!("$ ");
