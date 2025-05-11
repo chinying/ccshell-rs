@@ -1,5 +1,5 @@
-mod os_utils;
 mod directory;
+mod os_utils;
 
 #[allow(unused_imports)]
 use std::io::{self, Write};
@@ -9,19 +9,22 @@ const VALID_COMMANDS: [&str; 5] = ["echo", "type", "exit", "pwd", "cd"];
 
 fn handle_command(command: &str, directory: &mut directory::Directory) {
     let tokens = command.split_whitespace().collect::<Vec<&str>>();
-    match command {
-        cmd if cmd.starts_with("echo") => {
+    if tokens.is_empty() {
+        return;
+    }
+    match tokens[0] {
+        "echo" => {
             let rest = &tokens[1..];
             println!("{}", rest.join(" "));
         }
-        cmd if cmd.starts_with("type") => {
+        "type" => {
             if tokens.len() > 1 {
                 if VALID_COMMANDS.contains(&tokens[1]) {
                     println!("{} is a shell builtin", tokens[1]);
                 } else {
                     let path = os_utils::get_path().unwrap();
                     let dirs = os_utils::get_dir_from_path(&path);
-                    let mut found: Option<String> = Option::None;
+                    let mut found: Option<String> = None;
                     for dir in dirs {
                         // macos things https://apple.stackexchange.com/q/458277
                         if dir.contains("com.apple.security.cryptexd") {
@@ -49,11 +52,10 @@ fn handle_command(command: &str, directory: &mut directory::Directory) {
         "pwd" => {
             println!("{}", directory.pwd());
         }
-        cmd if cmd.starts_with("cd") => {
+        "cd" => {
             let result = directory.cd(tokens[1]);
             match result {
-                Ok(_) => {
-                }
+                Ok(_) => {}
                 Err(_e) => {
                     let rest = &tokens[1..];
                     eprintln!("cd: {}: No such file or directory", rest.join(" "));

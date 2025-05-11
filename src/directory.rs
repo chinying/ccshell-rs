@@ -6,9 +6,11 @@ pub struct Directory {
 
 impl Directory {
     pub fn new() -> Self {
-        Self { current_path: env::current_dir()
-            .map(|path| path.display().to_string())
-            .unwrap_or_default() }
+        Self {
+            current_path: env::current_dir()
+                .map(|path| path.display().to_string())
+                .unwrap_or_default(),
+        }
     }
 
     pub fn cd(&mut self, dir: &str) -> Result<(), io::Error> {
