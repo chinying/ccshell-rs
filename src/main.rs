@@ -1,4 +1,5 @@
 mod os_utils;
+mod directory;
 
 #[allow(unused_imports)]
 use std::io::{self, Write};
@@ -6,7 +7,7 @@ use std::process::Command;
 
 const VALID_COMMANDS: [&str; 5] = ["echo", "type", "exit", "pwd", "cd"];
 
-fn handle_command(command: &str) {
+fn handle_command(command: &str, directory: &mut directory::Directory) {
     let tokens = command.split_whitespace().collect::<Vec<&str>>();
     match command {
         cmd if cmd.starts_with("echo") => {
@@ -46,10 +47,10 @@ fn handle_command(command: &str) {
             }
         }
         "pwd" => {
-            println!("{}", os_utils::pwd().unwrap());
+            println!("{}", directory.pwd());
         }
-        "cd" => {
-            os_utils::cd(tokens[1]).unwrap();
+        cmd if cmd.starts_with("cd") => {
+            directory.cd(tokens[1]).unwrap();
         }
         _ => {
             exec(command);
@@ -79,6 +80,7 @@ fn exec(command: &str) {
 fn main() {
     // by default, treat everything as invalid
     let mut exit = false;
+    let mut directory = directory::Directory::new();
     while !exit {
         // Wait for user input
         print!("$ ");
@@ -90,7 +92,7 @@ fn main() {
         match input.trim() {
             "exit 0" => exit = true,
             command => {
-                handle_command(command);
+                handle_command(command, &mut directory);
             }
         }
     }
