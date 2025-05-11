@@ -50,7 +50,15 @@ fn handle_command(command: &str, directory: &mut directory::Directory) {
             println!("{}", directory.pwd());
         }
         cmd if cmd.starts_with("cd") => {
-            directory.cd(tokens[1]).unwrap();
+            let result = directory.cd(tokens[1]);
+            match result {
+                Ok(_) => {
+                }
+                Err(_e) => {
+                    let rest = &tokens[1..];
+                    eprintln!("cd: {}: No such file or directory", rest.join(" "));
+                }
+            }
         }
         _ => {
             exec(command);
