@@ -2,6 +2,7 @@ mod os_utils;
 
 #[allow(unused_imports)]
 use std::io::{self, Write};
+use std::process::Command;
 
 const VALID_COMMANDS: [&str; 3] = ["echo", "type", "exit"];
 
@@ -41,7 +42,28 @@ fn handle_command(command: &str) {
             }
         }
         _ => {
-            println!("{}: command not found", command);
+            // exec
+            // println!("{}: command not found", command);
+            exec(command);
+        }
+    }
+}
+
+fn exec(command: &str) {
+    let tokens = command.split_whitespace().collect::<Vec<&str>>();
+    let result = Command::new(tokens[0])
+        .args(&tokens[1..])
+        .spawn()
+        .and_then(|mut child| child.wait());
+
+    match result {
+        Ok(status) => {
+            if !status.success() {
+                eprintln!("{}: command not found", command);
+            }
+        }
+        Err(_e) => {
+            eprintln!("{}: command not found", command);
         }
     }
 }
