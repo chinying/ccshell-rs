@@ -22,9 +22,3 @@ pub fn list_dir(dir: &str) -> Result<Vec<String>, io::Error> {
         .map(|res| res.map(|e| e.file_name().into_string().unwrap()))
         .collect()
 }
-
-// // absolute path for now
-// pub fn cd(dir: &str) -> Result<(), io::Error> {
-//     env::set_current_dir(dir)
-//         .map_err(|_| io::Error::new(io::ErrorKind::Other, "failed to change directory"))
-// }

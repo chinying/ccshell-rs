@@ -53,7 +53,11 @@ fn handle_command(command: &str, directory: &mut directory::Directory) -> io::Re
             println!("{}", directory.pwd());
         }
         "cd" => {
-            directory.cd(tokens[1])?;
+            if tokens.len() > 1 {
+                directory.cd(tokens[1])?;
+            } else {
+                eprintln!("cd: too few arguments");
+            }
         }
         _ => {
             exec(command);
