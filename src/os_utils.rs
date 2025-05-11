@@ -19,11 +19,8 @@ pub fn list_dir(dir: &str) -> Result<Vec<String>, io::Error> {
         return Err(io::Error::new(io::ErrorKind::Other, "not a directory"));
     }
     fs::read_dir(dir)?
-      .map(|res| {
-        res
-        .map(|e| e.file_name().into_string().unwrap())
-      })
-      .collect()
+        .map(|res| res.map(|e| e.file_name().into_string().unwrap()))
+        .collect()
 }
 
 pub fn pwd() -> Result<String, io::Error> {

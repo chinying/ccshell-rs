@@ -22,10 +22,14 @@ fn handle_command(command: &str) {
                     let dirs = os_utils::get_dir_from_path(&path);
                     let mut found: Option<String> = Option::None;
                     for dir in dirs {
+                        // macos things https://apple.stackexchange.com/q/458277
                         if dir.contains("com.apple.security.cryptexd") {
                             continue;
                         }
-                        if os_utils::list_dir(&dir).unwrap().contains(&tokens[1].to_string()) {
+                        if os_utils::list_dir(&dir)
+                            .unwrap()
+                            .contains(&tokens[1].to_string())
+                        {
                             found = Some(dir);
                             break;
                         }
@@ -76,7 +80,7 @@ fn main() {
     // by default, treat everything as invalid
     let mut exit = false;
     while !exit {
-            // Wait for user input
+        // Wait for user input
         print!("$ ");
         io::stdout().flush().unwrap();
 
@@ -90,5 +94,4 @@ fn main() {
             }
         }
     }
-    // println!("{:?}", os_utils::list_dir("/bin").unwrap());
 }
