@@ -11,7 +11,9 @@ pub fn get_dir_from_path(path: &str) -> Vec<String> {
 }
 
 fn is_dir(dir: &str) -> bool {
-    fs::metadata(dir).unwrap().is_dir()
+    fs::metadata(dir)
+        .map(|m| m.is_dir())
+        .unwrap_or(false)
 }
 
 pub fn list_dir(dir: &str) -> Result<Vec<String>, io::Error> {
@@ -19,6 +21,9 @@ pub fn list_dir(dir: &str) -> Result<Vec<String>, io::Error> {
         return Err(io::Error::new(io::ErrorKind::Other, "not a directory"));
     }
     fs::read_dir(dir)?
-        .map(|res| res.map(|e| e.file_name().into_string().unwrap()))
+        .map(|res| {
+            let e = res?;
+            e.file_name().into_string().map_err(|_| io::Error::new(io::ErrorKind::InvalidData, "Invalid UTF-8 filename"))
+        })
         .collect()
 }
