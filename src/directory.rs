@@ -14,12 +14,13 @@ impl Directory {
     }
 
     pub fn cd(&mut self, dir: &str) -> Result<(), io::Error> {
+        let error_message = format!("cd: {}: No such file or directory", dir);
         env::set_current_dir(dir)
             .and_then(|_| {
                 self.current_path = dir.to_string();
                 Ok(())
             })
-            .map_err(|_| io::Error::new(io::ErrorKind::Other, "failed to change directory"))
+            .map_err(|_| io::Error::new(io::ErrorKind::Other, error_message))
     }
 
     pub fn pwd(&self) -> String {

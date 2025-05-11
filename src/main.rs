@@ -7,10 +7,10 @@ use std::process::Command;
 
 const VALID_COMMANDS: [&str; 5] = ["echo", "type", "exit", "pwd", "cd"];
 
-fn handle_command(command: &str, directory: &mut directory::Directory) {
+fn handle_command(command: &str, directory: &mut directory::Directory) -> io::Result<()> {
     let tokens = command.split_whitespace().collect::<Vec<&str>>();
     if tokens.is_empty() {
-        return;
+        return Ok(());
     }
     match tokens[0] {
         "echo" => {
@@ -53,19 +53,13 @@ fn handle_command(command: &str, directory: &mut directory::Directory) {
             println!("{}", directory.pwd());
         }
         "cd" => {
-            let result = directory.cd(tokens[1]);
-            match result {
-                Ok(_) => {}
-                Err(_e) => {
-                    let rest = &tokens[1..];
-                    eprintln!("cd: {}: No such file or directory", rest.join(" "));
-                }
-            }
+            directory.cd(tokens[1])?;
         }
         _ => {
             exec(command);
         }
     }
+    Ok(())
 }
 
 fn exec(command: &str) {
@@ -102,7 +96,9 @@ fn main() {
         match input.trim() {
             "exit 0" => exit = true,
             command => {
-                handle_command(command, &mut directory);
+                if let Err(e) = handle_command(command, &mut directory) {
+                    eprintln!("{}", e);
+                }
             }
         }
     }
