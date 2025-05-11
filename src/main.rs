@@ -4,7 +4,7 @@ mod os_utils;
 use std::io::{self, Write};
 use std::process::Command;
 
-const VALID_COMMANDS: [&str; 3] = ["echo", "type", "exit"];
+const VALID_COMMANDS: [&str; 4] = ["echo", "type", "exit", "pwd"];
 
 fn handle_command(command: &str) {
     let tokens = command.split_whitespace().collect::<Vec<&str>>();
@@ -41,9 +41,10 @@ fn handle_command(command: &str) {
                 }
             }
         }
+        "pwd" => {
+            println!("{}", os_utils::pwd().unwrap());
+        }
         _ => {
-            // exec
-            // println!("{}: command not found", command);
             exec(command);
         }
     }

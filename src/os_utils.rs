@@ -25,3 +25,9 @@ pub fn list_dir(dir: &str) -> Result<Vec<String>, io::Error> {
       })
       .collect()
 }
+
+pub fn pwd() -> Result<String, io::Error> {
+    env::current_dir()
+        .map(|path| path.display().to_string())
+        .map_err(|_| io::Error::new(io::ErrorKind::Other, "failed to get current directory"))
+}
