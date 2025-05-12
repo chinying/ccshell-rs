@@ -14,14 +14,25 @@ impl Directory {
 
     pub fn cd(&mut self, dir: &str) -> Result<(), io::Error> {
         let error_message = format!("cd: {}: No such file or directory", dir);
-        if Path::new(dir).is_absolute() {
-            self.cd_absolute_path(dir, &error_message)
-        } else {
-            let mut p = self.current_path.clone();
-            p.push(dir);
-            let normalized_dir = p.canonicalize()?;
-            env::set_current_dir(&normalized_dir)?;
-            Ok(())
+        match dir {
+            "~" => {
+                let home_dir = env::var("HOME").unwrap_or_default();
+                env::set_current_dir(&home_dir)?;
+                self.current_path = PathBuf::from(&home_dir);
+                Ok(())
+            }
+            _ => {
+                if Path::new(dir).is_absolute() {
+                    self.cd_absolute_path(dir, &error_message)
+                } else {
+                    let mut p = self.current_path.clone();
+                    p.push(dir);
+                    let normalized_dir = p.canonicalize()?;
+                    env::set_current_dir(&normalized_dir)?;
+                    self.current_path = normalized_dir;
+                    Ok(())
+                }
+            }
         }
     }
 
