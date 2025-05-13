@@ -1,5 +1,6 @@
 mod directory;
 mod os_utils;
+mod parser;
 
 #[allow(unused_imports)]
 use std::io::{self, Write};
@@ -8,7 +9,11 @@ use std::process::Command;
 const VALID_COMMANDS: [&str; 5] = ["echo", "type", "exit", "pwd", "cd"];
 
 fn handle_command(command: &str, directory: &mut directory::Directory) -> io::Result<()> {
-    let tokens = command.split_whitespace().collect::<Vec<&str>>();
+    let parts: Vec<String> = parser::parse_command(command.to_string());
+    let tokens = parts
+        .iter()
+        .map(|s| s.as_str())
+        .collect::<Vec<&str>>();
     if tokens.is_empty() {
         return Ok(());
     }
@@ -67,8 +72,8 @@ fn handle_command(command: &str, directory: &mut directory::Directory) -> io::Re
 }
 
 fn exec(command: &str) {
-    let tokens = command.split_whitespace().collect::<Vec<&str>>();
-    let result = Command::new(tokens[0])
+    let tokens = parser::parse_command(command.to_string());
+    let result = Command::new(tokens[0].clone())
         .args(&tokens[1..])
         .spawn()
         .and_then(|mut child| child.wait());
