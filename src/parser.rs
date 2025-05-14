@@ -19,16 +19,8 @@ pub fn parse_command(command: String) -> Vec<String> {
     let mut idx = 0;
     let mut sb = String::new();
     while idx < command.len() {
-        // print!("{} ", bytes[idx] as char);
         match bytes[idx] {
             b'\'' => {
-                if within_quotes {
-                    // ie. encountered close quote
-                    sb.drain(..1);
-                    push_str(&mut tokens, &mut sb);
-                } else {
-                    sb.push(bytes[idx] as char);
-                }
                 within_quotes = !within_quotes;
             }
             b' ' => {
@@ -56,8 +48,8 @@ mod tests {
 
     #[test]
     fn test_parse_command() {
-        let command = "echo 'Hello   world!'";
+        let command = "echo 'world     test' 'example''hello'";
         let tokens = parse_command(command.to_string());
-        assert_eq!(tokens, vec!["echo", "'Hello   world!'"]);
+        assert_eq!(tokens, vec!["echo", "world     test", "example", "hello"]);
     }
 }
