@@ -1,6 +1,11 @@
+const QUOTE_CHARS: [u8; 2] = [b'\'', b'\"'];
+
 fn push_str(tokens: &mut Vec<String>, str: &mut String) {
     if !str.is_empty() {
-        tokens.push(str.clone());
+        let tok = str //.trim_matches(|c| QUOTE_CHARS.contains(&c));
+            .trim_start_matches(|c| c == '\'' || c == '"')
+            .trim_end_matches(|c| c == '\'' || c == '"');
+        tokens.push(tok.to_string());
         str.clear();
     }
 }
@@ -15,19 +20,31 @@ fn push_str(tokens: &mut Vec<String>, str: &mut String) {
 pub fn parse_command(command: String) -> Vec<String> {
     let mut tokens = Vec::new();
     let bytes = command.as_bytes();
-    let mut within_quotes = false;
     let mut idx = 0;
     let mut sb = String::new();
+    let mut bracket_stack: Vec<u8> = Vec::new();
     while idx < command.len() {
         match bytes[idx] {
-            b'\'' => {
-                within_quotes = !within_quotes;
+            c if c == QUOTE_CHARS[0] || c == QUOTE_CHARS[1] => {
+                if bracket_stack.len() > 0 {
+                    if c == *bracket_stack.last().unwrap() {
+                        bracket_stack.pop();
+                    } else {
+                        sb.push(c as char);
+                    }
+                } else {
+                    bracket_stack.push(c);
+                }
             }
             b' ' => {
-                if within_quotes {
+                // println!("space encountered, bracket_stack: {:?}", bracket_stack);
+                if bracket_stack.len() > 0 {
+                    // println!("bracket_stack: {:?}", bracket_stack);
                     sb.push(bytes[idx] as char);
                 } else {
-                    push_str(&mut tokens, &mut sb);
+                    if sb.len() > 0 {
+                        push_str(&mut tokens, &mut sb);
+                    }
                 }
             }
             _ => {
@@ -36,9 +53,7 @@ pub fn parse_command(command: String) -> Vec<String> {
         }
         idx += 1;
     }
-    if !sb.is_empty() {
-        tokens.push(sb);
-    }
+    push_str(&mut tokens, &mut sb);
     tokens
 }
 
