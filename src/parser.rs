@@ -1,12 +1,12 @@
-const QUOTE_CHARS: [u8; 2] = [b'\'', b'\"'];
+const QUOTE_CHARS: [char; 2] = ['\'', '\"'];
 
-fn push_str(tokens: &mut Vec<String>, str: &mut String) {
-    if !str.is_empty() {
-        let tok = str //.trim_matches(|c| QUOTE_CHARS.contains(&c));
-            .trim_start_matches(|c| c == '\'' || c == '"')
-            .trim_end_matches(|c| c == '\'' || c == '"');
+fn push_str(tokens: &mut Vec<String>, buf: &mut String) {
+    if !buf.is_empty() {
+        let tok = buf
+            .trim_start_matches(|c| QUOTE_CHARS.contains(&c))
+            .trim_end_matches(|c| QUOTE_CHARS.contains(&c));
         tokens.push(tok.to_string());
-        str.clear();
+        buf.clear();
     }
 }
 
@@ -17,30 +17,26 @@ fn push_str(tokens: &mut Vec<String>, str: &mut String) {
  * ie. if within_quotes, continue collecting
  * when encountering close quote, push to tokens
  */
-pub fn parse_command(command: String) -> Vec<String> {
+pub fn parse_command(command: &str) -> Vec<String> {
     let mut tokens = Vec::new();
-    let bytes = command.as_bytes();
-    let mut idx = 0;
     let mut sb = String::new();
-    let mut bracket_stack: Vec<u8> = Vec::new();
-    while idx < command.len() {
-        match bytes[idx] {
-            c if c == QUOTE_CHARS[0] || c == QUOTE_CHARS[1] => {
+    let mut bracket_stack: Vec<char> = Vec::new();
+    for c in command.chars() {
+        match c {
+            ch if QUOTE_CHARS.contains(&ch) => {
                 if bracket_stack.len() > 0 {
                     if c == *bracket_stack.last().unwrap() {
                         bracket_stack.pop();
                     } else {
-                        sb.push(c as char);
+                        sb.push(c);
                     }
                 } else {
                     bracket_stack.push(c);
                 }
             }
-            b' ' => {
-                // println!("space encountered, bracket_stack: {:?}", bracket_stack);
+            ' ' => {
                 if bracket_stack.len() > 0 {
-                    // println!("bracket_stack: {:?}", bracket_stack);
-                    sb.push(bytes[idx] as char);
+                    sb.push(c);
                 } else {
                     if sb.len() > 0 {
                         push_str(&mut tokens, &mut sb);
@@ -48,10 +44,9 @@ pub fn parse_command(command: String) -> Vec<String> {
                 }
             }
             _ => {
-                sb.push(bytes[idx] as char);
+                sb.push(c);
             }
         }
-        idx += 1;
     }
     push_str(&mut tokens, &mut sb);
     tokens
@@ -64,7 +59,7 @@ mod tests {
     #[test]
     fn test_parse_command() {
         let command = "echo 'world     test' 'example''hello'";
-        let tokens = parse_command(command.to_string());
+        let tokens = parse_command(command);
         assert_eq!(tokens, vec!["echo", "world     test", "example", "hello"]);
     }
 }
